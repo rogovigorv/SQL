@@ -12,6 +12,7 @@ import com.foxminded.SQL.generate.TablesGenerator;
 import com.foxminded.SQL.input.Input;
 import com.foxminded.SQL.input.QueryInput;
 import com.foxminded.SQL.query.QueryFactory;
+import com.foxminded.SQL.validator.SchoolApplicationValidator;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,8 +63,16 @@ public class SchoolApplicationFacade {
         Input userChoice = new QueryInput();
         System.out.println(queryFactory.sayHello());
         String choice = userChoice.input();
+        new SchoolApplicationValidator().validateCategory(choice);
+
         if (choice.equals("a")) {
-            queryFactory.getGroups(studentDao).forEach(g -> System.out.print(g + " "));
+            List<Integer> foundGroups = queryFactory.getGroups(studentDao);
+
+            if (foundGroups.isEmpty()) {
+                System.out.println("There were no such groups");
+            }
+
+            foundGroups.forEach(g -> System.out.print(g + " "));
         }
 
         if (choice.equals("b")) {
@@ -87,6 +96,12 @@ public class SchoolApplicationFacade {
 
         if (choice.equals("e")) {
             queryFactory.addStudentToTheCourse(students, courses, studentsAndCoursesRelationDao);
+            System.out.println("Student added to the course.");
+        }
+
+        if (choice.equals("f")) {
+            queryFactory.removeTheStudentFromCourse(students, studentsAndCoursesRelationDao);
+            System.out.println("Student removed from course.");
         }
     }
 }

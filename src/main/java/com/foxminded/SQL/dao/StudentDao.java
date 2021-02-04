@@ -2,7 +2,6 @@ package com.foxminded.SQL.dao;
 
 import com.foxminded.SQL.domain.Student;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,7 +12,7 @@ public class StudentDao {
     private static final String CREATE_STUDENTS_SQL =
             "INSERT INTO students (student_id, group_id, first_name, last_name) VALUES ";
     private static final String SELECT_ALL_STUDENTS_SQL = "SELECT * FROM students";
-    private static final String DELETE_STUDENT_BY_ID = "DELETE FROM students WHERE student_id = ?";
+    private static final String DELETE_STUDENT_BY_ID = "DELETE FROM students WHERE student_id = ";
     private static final String SINGLE_QUOTE = "'";
     private static final String LEFT_PARENTHESIS = "(";
     private static final String RIGHT_PARENTHESIS = ")";
@@ -111,10 +110,9 @@ public class StudentDao {
     public void deleteStudentByID(int studentID) throws SQLException {
 
         try (Connection conn = ConnectionFactory.connect();
-             PreparedStatement prepareStatement = conn.prepareStatement(DELETE_STUDENT_BY_ID)) {
+             Statement stat = conn.createStatement()) {
 
-            prepareStatement.setInt(1, studentID);
-            prepareStatement.executeUpdate();
+            stat.executeUpdate(DELETE_STUDENT_BY_ID + studentID);
 
         } catch (SQLException throwables) {
             throw new SQLException();

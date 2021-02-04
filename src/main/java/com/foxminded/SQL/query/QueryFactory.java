@@ -8,6 +8,8 @@ import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
 import com.foxminded.SQL.input.Input;
 import com.foxminded.SQL.input.QueryInput;
+import com.foxminded.SQL.validator.SchoolApplicationValidator;
+import com.foxminded.SQL.validator.Validator;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,11 +65,17 @@ public class QueryFactory {
 
     public void addStudent(List<Group> groups, StudentDao studentDao) {
         System.out.println("Please enter any student ID (must be more than 200), group ID " + "\n" +
-                "(must be in the range from 1 to 10), first name and last name");
+                "(must be in the range from 1 to 10), first name and last name.");
 
         Input userInput = new QueryInput();
+        Validator validator = new SchoolApplicationValidator();
+
         int studentID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTwoHundred(studentID);
+
         int groupID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTen(groupID);
+
         String firstName = userInput.input();
         String lastName = userInput.input();
 
@@ -85,10 +93,11 @@ public class QueryFactory {
     }
 
     public void deleteStudent(List<Student> students, StudentDao studentDao) {
-        System.out.println("Please enter any student ID (ID must be less or equal than 200)");
+        System.out.println("Please enter any student ID (ID must be less or equal than 200).");
 
         Input userInput = new QueryInput();
         int studentID = Integer.parseInt(userInput.input());
+        new SchoolApplicationValidator().validateFromOneToTwoHundred(studentID);
 
         for (Student student : students) {
             if (studentID == student.getStudentID()) {
@@ -105,10 +114,12 @@ public class QueryFactory {
                                                     StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
         System.out.println("Please enter the course name to find all students enrolled in it " + "\n" +
                 "(available courses: math, biology, chemistry, english, geography, geometry, history, " + "\n" +
-                "literature, physics, art)");
+                "literature, physics, art).");
 
         Input userInput = new QueryInput();
         String courseName = userInput.input();
+
+        new SchoolApplicationValidator().validateCorrectCourseName(courseName);
 
         List<Integer> studentsID = new ArrayList<>();
         List<Student> studentsSorted = new ArrayList<>();
@@ -137,76 +148,47 @@ public class QueryFactory {
 
     public void addStudentToTheCourse(List<Student> students,  List<Course> courses,
                                       StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
-        System.out.println("Please enter the ID of the students (ID must be less or equal than 200).");
-        System.out.println("Please enter 'end' after all required student ID's have been entered.");
+        System.out.println("Please enter the ID of the student (ID must be less or equal than 200).");
 
-        List<Student> selectedStudents = getStudentsFromUser(students);
+        Input userInput = new QueryInput();
+        Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("Please enter the ID's of the courses you want to enroll students.");
-        System.out.println("Please enter 'end' after all required courses ID's have been entered.");
+        int studentID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTwoHundred(studentID);
 
-        List<Course> selectedCourses = getCoursesFromUser(courses);
+        System.out.println("Please enter the ID of the course you want to enroll students " +
+                "(must be in the range from 1 to 10).");
+
+        int courseID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTen(courseID);
 
         try {
-            studentsAndCoursesRelationDao.addToTheCourse(selectedStudents, selectedCourses);
+            studentsAndCoursesRelationDao.addToTheCourse(studentID, courseID, students, courses);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    private List<Student> getStudentsFromUser(List<Student> students) {
-        List<Student> result = new ArrayList<>();
+    public void removeTheStudentFromCourse(List<Student> students,
+                                           StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
+        System.out.println("Please enter the ID of the student (ID must be less or equal than 200).");
 
-        Input input = new QueryInput();
-        String studentIdInput;
+        Input userInput = new QueryInput();
+        Validator validator = new SchoolApplicationValidator();
 
-        while (true) {
-            studentIdInput = input.input();
+        int studentID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTwoHundred(studentID);
 
-            if(studentIdInput.equals("end")) {
-                break;
-            }
+        System.out.println("Please enter the ID of the course you want to enroll students "  +
+                "(must be in the range from 1 to 10).");
 
-            int studentID = Integer.parseInt(studentIdInput);
+        int courseID = Integer.parseInt(userInput.input());
+        validator.validateFromOneToTen(courseID);
 
-            students.forEach(s ->  {
-                if (s.getStudentID() == studentID) {
-                    if (!result.contains(s)) {
-                        result.add(s);
-                    }
-                }
-            });
+        try {
+            studentsAndCoursesRelationDao.removeFromCourse(studentID, courseID, students);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
-
-        return result;
-    }
-
-    private List<Course> getCoursesFromUser(List<Course> courses) {
-
-        List<Course> result = new ArrayList<>();
-
-        Input input = new QueryInput();
-
-        String courseIdInput;
-
-        while (true) {
-            courseIdInput = input.input();
-
-            if(courseIdInput.equals("end")) {
-                break;
-            }
-
-            int courseID = Integer.parseInt(courseIdInput);
-
-            courses.forEach(c ->  {
-                if (c.getCourseID() == courseID) {
-                    if (!result.contains(c)) {
-                        result.add(c);
-                    }
-                }
-            });
-        }
-
-        return result;
     }
 }

@@ -20,8 +20,9 @@ public class SchoolApplication {
         StudentsAndCoursesRelationDao studentsAndCoursesRelationDao = new StudentsAndCoursesRelationDao();
         QueryFactory queryFactory = new QueryFactory();
 
-        SchoolApplicationFacade launch = new SchoolApplicationFacade(getTables, getGroups, getCourses, getStudents,
-                courseDao, groupDao, studentDao, studentsAndCoursesRelationDao, queryFactory);
+        SchoolApplicationFacade launch = new SchoolApplicationFacade(getTables, getGroups, getCourses,
+                getStudents, courseDao, groupDao, studentDao, studentsAndCoursesRelationDao, queryFactory);
+
         launch.run();
     }
 }

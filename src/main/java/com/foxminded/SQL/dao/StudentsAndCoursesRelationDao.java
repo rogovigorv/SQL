@@ -18,6 +18,10 @@ public class StudentsAndCoursesRelationDao {
             "INSERT INTO studentsAndCoursesRelation (student_id, course_id) VALUES ";
     private static final String SELECT_ALL_STUDENTS_AND_COURSES_RELATION_SQL =
             "SELECT * FROM studentsAndCoursesRelation ";
+    private static final String DELETE_STUDENT_FROM_COURSE_SQL = "DELETE FROM studentsAndCoursesRelation WHERE ";
+    private static final String STUDENT_ID = "student_id = ";
+    private static final String COURSE_ID = "course_id = ";
+    private static final String AND = " AND ";
     private static final String SINGLE_QUOTE = "'";
     private static final String LEFT_PARENTHESIS = "(";
     private static final String RIGHT_PARENTHESIS = ")";
@@ -75,11 +79,15 @@ public class StudentsAndCoursesRelationDao {
         return studentsID;
     }
 
-    public void addToTheCourse(List<Student> students,  List<Course> courses) throws SQLException {
+    public void addToTheCourse(int studentID,  int courseID,
+                               List<Student> students,  List<Course> courses) throws SQLException {
         try (Connection conn = ConnectionFactory.connect();
              Statement stat = conn.createStatement()) {
 
             List<Map<Integer, Integer>> fromDataBase = new ArrayList<>();
+            List<Student> enrolledStudents = new ArrayList<>();
+            Set<Student> preparedStudent = new HashSet<>();
+            Set<Course> preparedCourse = new HashSet<>();
 
             ResultSet rs = stat.executeQuery(SELECT_ALL_STUDENTS_AND_COURSES_RELATION_SQL);
 
@@ -87,24 +95,61 @@ public class StudentsAndCoursesRelationDao {
                 fromDataBase.add(getFromDB(rs.getInt(2), rs.getInt(1)));
             }
 
-            for (Course course : courses) {
-                List<Student> studentEnrolToTheCourse = new ArrayList<>();
+            fromDataBase.forEach(f -> f.forEach((key, value) -> {
+                if(f.get(courseID) != null) {
+                    int enrolledStudentID = f.get(courseID);
+                    students.forEach(s -> {
+                        if(s.getStudentID() == enrolledStudentID) {
+                            enrolledStudents.add(s);
+                        }
+                    });
+                }
+            }));
 
-                fromDataBase.forEach(f -> f.forEach((key, value) -> {
+            enrolledStudents.forEach(e -> {
+                if(studentID != e.getStudentID()) {
+                    students.forEach(s -> {
+                        if(s.getStudentID() == studentID) {
+                            preparedStudent.add(s);
+                        }
+                    });
+                }
+            });
 
-                    if(f.get(course.getCourseID()) != null) {
-                        int studentID = f.get(course.getCourseID());
-                        students.forEach(s -> {
+            courses.forEach(c -> {
+                if(c.getCourseID() == courseID) {
+                    preparedCourse.add(c);
+                }
+            });
 
-                            if (s.getStudentID() == studentID) {
-                                studentEnrolToTheCourse.add(s);
-                            }
-                        });
-                    }
-                }));
+            Student desiredStudent = preparedStudent.iterator().next();
+            Course desiredCourse = preparedCourse.iterator().next();
 
-               // studentEnrolToTheCourse.forEach(s -> System.out.println(s.toString() + " " + "added to " + course.getCourseName()));
-            }
+            desiredStudent.addCourse(desiredCourse);
+
+            addNewStudentToTheCourse(desiredStudent, courseID);
+
+        } catch (SQLException throwables) {
+            throw new SQLException();
+        }
+    }
+
+    public void removeFromCourse(int studentID, int courseID, List<Student> students) throws SQLException {
+        try (Connection conn = ConnectionFactory.connect();
+             Statement stat = conn.createStatement()) {
+
+            stat.executeUpdate(DELETE_STUDENT_FROM_COURSE_SQL +
+                    STUDENT_ID + studentID + AND + COURSE_ID + courseID);
+
+            students.forEach(s -> {
+                if(s.getStudentID() == studentID) {
+                    s.getCourses().forEach(c -> {
+                        if(c.getCourseID() == courseID) {
+                            s.getCourses().remove(c);
+                        }
+                    });
+                }
+            });
 
         } catch (SQLException throwables) {
             throw new SQLException();
@@ -128,4 +173,32 @@ public class StudentsAndCoursesRelationDao {
             return result;
         }
 
+
+    private void addNewStudentToTheCourse(Student student, int courseID) throws SQLException {
+        try (Connection conn = ConnectionFactory.connect();
+             Statement stat = conn.createStatement()) {
+
+            try {
+
+                int studentID = student.getStudentID();
+
+                stat.executeUpdate(CREATE_STUDENTS_AND_COURSES_RELATION_SQL +
+                        LEFT_PARENTHESIS +
+                        SINGLE_QUOTE +
+                        studentID +
+                        SINGLE_QUOTE +
+                        COMMA +
+                        TAB +
+                        SINGLE_QUOTE +
+                        courseID +
+                        SINGLE_QUOTE +
+                        RIGHT_PARENTHESIS);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException throwables) {
+            throw new SQLException();
+        }
+    }
 }

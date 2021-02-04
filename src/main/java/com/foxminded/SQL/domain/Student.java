@@ -39,6 +39,10 @@ public class Student {
         return courses;
     }
 
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
     public String toString() {
         return firstName + TAB + lastName;
     }
