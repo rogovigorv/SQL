@@ -6,6 +6,8 @@ public interface Validator {
 
     void validateFromOneToTwoHundred(int ID);
 
+    void validateMoreThanTwoHundred(int ID);
+
     void validateCorrectCourseName(String courseName);
 
     void validateCategory(String category);

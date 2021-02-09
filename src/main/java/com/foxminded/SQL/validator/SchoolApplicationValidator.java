@@ -20,6 +20,13 @@ public class SchoolApplicationValidator implements Validator {
     }
 
     @Override
+    public void validateMoreThanTwoHundred(int ID) {
+        if(ID <= 200) {
+            throw new IllegalArgumentException("ID must be more than 200.");
+        }
+    }
+
+    @Override
     public void validateCorrectCourseName(String courseName) {
         List<String> validCourseNames = Arrays.asList("math", "biology", "chemistry", "english",
                 "geography", "geometry", "history", "literature", "physics", "art");

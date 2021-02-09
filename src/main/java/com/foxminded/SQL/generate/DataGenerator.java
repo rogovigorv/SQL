@@ -3,14 +3,26 @@ package com.foxminded.SQL.generate;
 import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class DataGenerator {
     private static final String DASH = "-";
+
+    private final String coursesListFile;
+
+    public DataGenerator(String coursesListFile) {
+        this.coursesListFile = coursesListFile;
+    }
 
     public List<Group> generateGroups() {
         List<Group> groups = new ArrayList<>();
@@ -39,30 +51,16 @@ public class DataGenerator {
     }
 
     public List<Course> generateCourses() {
-        List<Course> courses = new ArrayList<>();
+        List<String> readCoursesFromFile = readCourses();
 
-        courses.add(new Course(1,"math",
-                "Here you are taught to count."));
-        courses.add(new Course(2,"biology",
-                "Here you are taught to love animals."));
-        courses.add(new Course(3,"chemistry",
-                "Here you are taught to cook."));
-        courses.add(new Course(4,"english",
-                "Here you are taught the right language."));
-        courses.add(new Course(5,"geography",
-                "Here you are taught how not to get lost."));
-        courses.add(new Course(6,"geometry",
-                "Here you are taught what is parallel for you."));
-        courses.add(new Course(7,"history",
-                "Here you are taught what will never happen again."));
-        courses.add(new Course(8, "literature",
-                "Here you are taught something that never happened."));
-        courses.add(new Course(9,"physics",
-                "Here you are taught what can happen if you do not know physics well."));
-        courses.add(new Course(10,"art",
-                "Here you are taught to dream."));
+        return readCoursesFromFile.stream().map(c -> {
+            String[] splitLine = c.split(DASH);
+            int courseID = Integer.parseInt(splitLine[0]);
+            String courseName = splitLine[1];
+            String courseDescription = splitLine[2];
 
-        return courses;
+            return new Course(courseID, courseName, courseDescription);
+        }).collect(toList());
     }
 
     public List<Student> generateStudents(List<Group> groups, List<Course> courses) {
@@ -109,5 +107,19 @@ public class DataGenerator {
         }
 
         return result;
+    }
+
+    private List<String> readCourses() {
+        List<String> readFromFile = new ArrayList<>();
+
+        try {
+            readFromFile = Files.lines(Paths.get(coursesListFile))
+                    .collect(Collectors.toList());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return readFromFile;
     }
 }

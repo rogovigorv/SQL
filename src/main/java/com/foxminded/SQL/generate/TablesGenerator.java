@@ -6,29 +6,30 @@ import java.io.File;
 import java.sql.Connection;
 
 public class TablesGenerator {
-    private static final String CREATE_SCRIPT =
-            "C:\\Users\\User\\Desktop\\Foxminded\\SQL\\src\\main\\resources\\create tables.sql";
+    private final String scriptFile;
 
-    public void create() {
-        Connection conn = ConnectionFactory.connect();
+    public TablesGenerator(String scriptFile) {
+        this.scriptFile = scriptFile;
+    }
+
+    public void create(ConnectionFactory connectionFactory) {
+        Connection conn = connectionFactory.connect();
 
         try {
-            SqlFile sf = new SqlFile(new File(CREATE_SCRIPT));
+            SqlFile sf = new SqlFile(new File(scriptFile));
             sf.setConnection(conn);
             sf.execute();
 
         } catch (Exception e) {
             e.printStackTrace();
 
-        } finally {
-        try {
+        } try {
             if (conn != null) {
                 conn.close();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
         }
     }
 }

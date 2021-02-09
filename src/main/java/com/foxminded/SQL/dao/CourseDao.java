@@ -2,44 +2,32 @@ package com.foxminded.SQL.dao;
 
 import com.foxminded.SQL.domain.Course;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import static com.foxminded.SQL.dao.Queries.CREATE_COURSES_SQL;
+import static com.foxminded.SQL.dao.Queries.SELECT_ALL_COURSES_SQL;
 
-public class CourseDao {
-    private static final String CREATE_COURSES_SQL =
-            "INSERT INTO courses (course_id, course_name, course_description) VALUES ";
-    private static final String SELECT_ALL_COURSES_SQL = "SELECT * FROM courses ";
-    private static final String SINGLE_QUOTE = "'";
-    private static final String LEFT_PARENTHESIS = "(";
-    private static final String RIGHT_PARENTHESIS = ")";
-    private static final String COMMA = ",";
-    private static final String TAB = " ";
+public class CourseDao implements SchoolDao<Course> {
+    private final ConnectionFactory connectionFactory;
 
+    public CourseDao(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
+    @Override
     public void insertToDB(List<Course> courses) throws SQLException {
-        try (Connection conn = ConnectionFactory.connect();
-             Statement stat = conn.createStatement()) {
+        try (Connection conn = connectionFactory.connect();
+             PreparedStatement stat = conn.prepareStatement(CREATE_COURSES_SQL)) {
 
             courses.forEach(c -> {
                 try {
-                    stat.executeUpdate(
-                            CREATE_COURSES_SQL +
-                                    LEFT_PARENTHESIS +
-                                    SINGLE_QUOTE +
-                                    c.getCourseID() +
-                                    SINGLE_QUOTE +
-                                    COMMA +
-                                    TAB +
-                                    SINGLE_QUOTE +
-                                    c.getCourseName() +
-                                    SINGLE_QUOTE +
-                                    COMMA +
-                                    TAB +
-                                    SINGLE_QUOTE +
-                                    c.getCourseDescription() +
-                                    SINGLE_QUOTE +
-                                    RIGHT_PARENTHESIS);
+                    stat.setInt(1, c.getCourseID());
+                    stat.setString(2, c.getCourseName());
+                    stat.setString(3, c.getCourseDescription());
+                    stat.executeUpdate();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -52,10 +40,10 @@ public class CourseDao {
     public Integer getCourseIDByName(String courseName) throws SQLException {
         int courseID = 0;
 
-        try (Connection conn = ConnectionFactory.connect();
-             Statement stat = conn.createStatement()) {
+        try (Connection conn = connectionFactory.connect();
+             PreparedStatement stat = conn.prepareStatement(SELECT_ALL_COURSES_SQL)) {
 
-            ResultSet rs = stat.executeQuery(SELECT_ALL_COURSES_SQL);
+            ResultSet rs = stat.executeQuery();
 
             while (rs.next()) {
                 if (courseName.equals(rs.getString(2))) {

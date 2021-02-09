@@ -2,7 +2,6 @@ package com.foxminded.SQL.query;
 
 import com.foxminded.SQL.dao.CourseDao;
 import com.foxminded.SQL.dao.StudentDao;
-import com.foxminded.SQL.dao.StudentsAndCoursesRelationDao;
 import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
@@ -71,7 +70,7 @@ public class QueryFactory {
         Validator validator = new SchoolApplicationValidator();
 
         int studentID = Integer.parseInt(userInput.input());
-        validator.validateFromOneToTwoHundred(studentID);
+        validator.validateMoreThanTwoHundred(studentID);
 
         int groupID = Integer.parseInt(userInput.input());
         validator.validateFromOneToTen(groupID);
@@ -111,7 +110,7 @@ public class QueryFactory {
     }
 
     public List<Student> getAllStudentsByCourseName(List<Course> courses, List<Student> students, CourseDao courseDao,
-                                                    StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
+                                                    StudentDao studentDao) {
         System.out.println("Please enter the course name to find all students enrolled in it " + "\n" +
                 "(available courses: math, biology, chemistry, english, geography, geometry, history, " + "\n" +
                 "literature, physics, art).");
@@ -128,7 +127,7 @@ public class QueryFactory {
             if (courseName.equals(course.getCourseName())) {
                 try {
                     int courseID = courseDao.getCourseIDByName(courseName);
-                    studentsID.addAll(studentsAndCoursesRelationDao.getStudentsIDByCourseID(courseID));
+                    studentsID.addAll(studentDao.getStudentsIDByCourseID(courseID));
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
@@ -146,8 +145,7 @@ public class QueryFactory {
         return studentsSorted;
     }
 
-    public void addStudentToTheCourse(List<Student> students,  List<Course> courses,
-                                      StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
+    public void addStudentToTheCourse(List<Student> students,  List<Course> courses, StudentDao studentDao) {
         System.out.println("Please enter the ID of the student (ID must be less or equal than 200).");
 
         Input userInput = new QueryInput();
@@ -163,14 +161,13 @@ public class QueryFactory {
         validator.validateFromOneToTen(courseID);
 
         try {
-            studentsAndCoursesRelationDao.addToTheCourse(studentID, courseID, students, courses);
+            studentDao.addToTheCourse(studentID, courseID, students, courses);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public void removeTheStudentFromCourse(List<Student> students,
-                                           StudentsAndCoursesRelationDao studentsAndCoursesRelationDao) {
+    public void removeTheStudentFromCourse(List<Student> students, StudentDao studentDao) {
         System.out.println("Please enter the ID of the student (ID must be less or equal than 200).");
 
         Input userInput = new QueryInput();
@@ -186,7 +183,7 @@ public class QueryFactory {
         validator.validateFromOneToTen(courseID);
 
         try {
-            studentsAndCoursesRelationDao.removeFromCourse(studentID, courseID, students);
+            studentDao.removeFromCourse(studentID, courseID, students);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

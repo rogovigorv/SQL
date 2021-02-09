@@ -4,16 +4,23 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class ConnectionFactory {
-    private static final String POSTGRES_URL = "jdbc:postgresql://localhost:5432/school";
-    private static final String USERNAME = "jhon_doe";
-    private static final String PASSWORD = "829893";
 
-    public static Connection connect() {
+    private final String url;
+    private final String userName;
+    private final String password;
+
+    public ConnectionFactory(String url, String userName, String password) {
+        this.url = url;
+        this.userName = userName;
+        this.password = password;
+    }
+
+    public Connection connect() {
         Connection conn = null;
 
         try {
             Class.forName("org.postgresql.Driver");
-            conn = DriverManager.getConnection(POSTGRES_URL, USERNAME, PASSWORD);
+            conn = DriverManager.getConnection(url, userName, password);
         } catch (Exception e) {
             e.printStackTrace();
         }

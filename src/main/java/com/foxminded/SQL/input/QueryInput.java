@@ -5,17 +5,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class QueryInput implements Input {
+
     @Override
     public String input() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        String chose = null;
+        String choice = null;
 
         try {
-            chose = reader.readLine();
+            choice = reader.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return chose;
+        return choice;
     }
 }

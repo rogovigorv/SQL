@@ -1,0 +1,10 @@
+1-math-Here you are taught to count.
+2-biology-Here you are taught to love animals.
+3-chemistry-Here you are taught to cook.
+4-english-Here you are taught the right language.
+5-geography-Here you are taught how not to get lost.
+6-geometry-Here you are taught what is parallel for you.
+7-history-Here you are taught what will never happen again.
+8-literature-Here you are taught something that never happened.
+9-physics-Here you are taught what can happen if you do not know physics well.
+10-art-Here you are taught to dream.

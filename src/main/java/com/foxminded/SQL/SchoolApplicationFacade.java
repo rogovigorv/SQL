@@ -1,9 +1,9 @@
 package com.foxminded.SQL;
 
+import com.foxminded.SQL.dao.ConnectionFactory;
 import com.foxminded.SQL.dao.CourseDao;
 import com.foxminded.SQL.dao.GroupDao;
 import com.foxminded.SQL.dao.StudentDao;
-import com.foxminded.SQL.dao.StudentsAndCoursesRelationDao;
 import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
@@ -18,44 +18,43 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SchoolApplicationFacade {
-    private final TablesGenerator getTables;
-    private final DataGenerator getGroups;
-    private final DataGenerator getCourses;
-    private final DataGenerator getStudents;
+    private final TablesGenerator tables;
+    private final DataGenerator groups;
+    private final DataGenerator courses;
+    private final DataGenerator students;
     private final CourseDao courseDao;
     private final GroupDao groupDao;
     private final StudentDao studentDao;
-    private final StudentsAndCoursesRelationDao studentsAndCoursesRelationDao;
+    private final ConnectionFactory connectionFactory;
     private final QueryFactory queryFactory;
 
-    public SchoolApplicationFacade(TablesGenerator getTables, DataGenerator getGroups,
-                                   DataGenerator getCourses, DataGenerator getStudents,
+    public SchoolApplicationFacade(TablesGenerator tables, DataGenerator groups,
+                                   DataGenerator courses, DataGenerator students,
                                    CourseDao courseDao, GroupDao groupDao, StudentDao studentDao,
-                                   StudentsAndCoursesRelationDao studentsAndCoursesRelationDao,
-                                   QueryFactory queryFactory) {
-        this.getTables = getTables;
-        this.getGroups = getGroups;
-        this.getCourses = getCourses;
-        this.getStudents = getStudents;
+                                   ConnectionFactory connectionFactory, QueryFactory queryFactory) {
+        this.tables = tables;
+        this.groups = groups;
+        this.courses = courses;
+        this.students = students;
         this.courseDao = courseDao;
         this.groupDao = groupDao;
         this.studentDao = studentDao;
-        this.studentsAndCoursesRelationDao = studentsAndCoursesRelationDao;
+        this.connectionFactory = connectionFactory;
         this.queryFactory = queryFactory;
     }
 
     public void run() {
-        getTables.create();
+        tables.create(connectionFactory);
 
-        List<Group> groups = new LinkedList<>(getGroups.generateGroups());
-        List<Course> courses = new LinkedList<>(getCourses.generateCourses());
-        List<Student> students = new LinkedList<>(getStudents.generateStudents(groups, courses));
+        List<Group> groups = new LinkedList<>(this.groups.generateGroups());
+        List<Course> courses = new LinkedList<>(this.courses.generateCourses());
+        List<Student> students = new LinkedList<>(this.students.generateStudents(groups, courses));
 
         try {
             groupDao.insertToDB(groups);
             courseDao.insertToDB(courses);
-            studentDao.addAllStudents(students);
-            studentsAndCoursesRelationDao.insertToDB(students);
+            studentDao.insertToDB(students);
+            studentDao.assignAllStudentsToCourses(students);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -77,7 +76,7 @@ public class SchoolApplicationFacade {
 
         if (choice.equals("b")) {
             List<Student> sorted =
-                    queryFactory.getAllStudentsByCourseName(courses, students,courseDao, studentsAndCoursesRelationDao);
+                    queryFactory.getAllStudentsByCourseName(courses, students, courseDao, studentDao);
 
             sorted.forEach(s -> System.out.println(s.toString()));
             System.out.println();
@@ -95,12 +94,12 @@ public class SchoolApplicationFacade {
         }
 
         if (choice.equals("e")) {
-            queryFactory.addStudentToTheCourse(students, courses, studentsAndCoursesRelationDao);
+            queryFactory.addStudentToTheCourse(students, courses, studentDao);
             System.out.println("Student added to the course.");
         }
 
         if (choice.equals("f")) {
-            queryFactory.removeTheStudentFromCourse(students, studentsAndCoursesRelationDao);
+            queryFactory.removeTheStudentFromCourse(students, studentDao);
             System.out.println("Student removed from course.");
         }
     }

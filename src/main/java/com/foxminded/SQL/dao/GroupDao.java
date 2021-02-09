@@ -2,37 +2,29 @@ package com.foxminded.SQL.dao;
 
 import com.foxminded.SQL.domain.Group;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
+import static com.foxminded.SQL.dao.Queries.CREATE_GROUPS_SQL;
 
-public class GroupDao {
-    private static final String CREATE_GROUPS_SQL = "INSERT INTO groups (group_id, group_name) VALUES ";
-    private static final String SINGLE_QUOTE = "'";
-    private static final String LEFT_PARENTHESIS = "(";
-    private static final String RIGHT_PARENTHESIS = ")";
-    private static final String COMMA = ",";
-    private static final String TAB = " ";
+public class GroupDao implements SchoolDao<Group>{
+    private final ConnectionFactory connectionFactory;
 
+    public GroupDao(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
+    @Override
     public void insertToDB(List<Group> groups) throws SQLException {
 
-        try (Connection conn = ConnectionFactory.connect();
-             Statement stat = conn.createStatement()) {
+        try (Connection conn = connectionFactory.connect();
+             PreparedStatement stat = conn.prepareStatement(CREATE_GROUPS_SQL)) {
 
             groups.forEach(g -> {
                 try {
-                    stat.executeUpdate(
-                            CREATE_GROUPS_SQL +
-                                    LEFT_PARENTHESIS +
-                                    SINGLE_QUOTE +
-                                    g.getGroupID() +
-                                    SINGLE_QUOTE +
-                                    COMMA +
-                                    TAB +
-                                    SINGLE_QUOTE +
-                                    g.getGroupName() +
-                                    SINGLE_QUOTE +
-                                    RIGHT_PARENTHESIS);
+                    stat.setInt(1, g.getGroupID());
+                    stat.setString(2, g.getGroupName());
+                    stat.executeUpdate();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
