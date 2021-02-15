@@ -6,7 +6,6 @@ import com.foxminded.SQL.dao.GroupDao;
 import com.foxminded.SQL.dao.StudentDao;
 import com.foxminded.SQL.generate.DataGenerator;
 import com.foxminded.SQL.generate.TablesGenerator;
-import com.foxminded.SQL.query.QueryFactory;
 
 public class SchoolApplication {
     private static final String POSTGRES_URL = "jdbc:postgresql://localhost:5432/school";
@@ -24,10 +23,9 @@ public class SchoolApplication {
         CourseDao courseDao = new CourseDao(connectionFactory);
         GroupDao groupDao = new GroupDao(connectionFactory);
         StudentDao studentDao = new StudentDao(connectionFactory);
-        QueryFactory queryFactory = new QueryFactory();
 
         SchoolApplicationFacade launch = new SchoolApplicationFacade(tables, groups, courses,
-                students, courseDao, groupDao, studentDao, connectionFactory, queryFactory);
+                students, courseDao, groupDao, studentDao, connectionFactory);
 
         launch.run();
     }

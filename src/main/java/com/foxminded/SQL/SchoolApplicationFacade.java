@@ -9,10 +9,9 @@ import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
 import com.foxminded.SQL.generate.DataGenerator;
 import com.foxminded.SQL.generate.TablesGenerator;
-import com.foxminded.SQL.input.Input;
-import com.foxminded.SQL.input.QueryInput;
-import com.foxminded.SQL.query.QueryFactory;
-import com.foxminded.SQL.validator.SchoolApplicationValidator;
+import com.foxminded.SQL.menu.Menu;
+import com.foxminded.SQL.menu.MenuItem;
+import com.foxminded.SQL.menu.MenuExecutor;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,12 +25,11 @@ public class SchoolApplicationFacade {
     private final GroupDao groupDao;
     private final StudentDao studentDao;
     private final ConnectionFactory connectionFactory;
-    private final QueryFactory queryFactory;
 
     public SchoolApplicationFacade(TablesGenerator tables, DataGenerator groups,
                                    DataGenerator courses, DataGenerator students,
                                    CourseDao courseDao, GroupDao groupDao, StudentDao studentDao,
-                                   ConnectionFactory connectionFactory, QueryFactory queryFactory) {
+                                   ConnectionFactory connectionFactory) {
         this.tables = tables;
         this.groups = groups;
         this.courses = courses;
@@ -40,7 +38,6 @@ public class SchoolApplicationFacade {
         this.groupDao = groupDao;
         this.studentDao = studentDao;
         this.connectionFactory = connectionFactory;
-        this.queryFactory = queryFactory;
     }
 
     public void run() {
@@ -59,48 +56,23 @@ public class SchoolApplicationFacade {
             throwables.printStackTrace();
         }
 
-        Input userChoice = new QueryInput();
-        System.out.println(queryFactory.sayHello());
-        String choice = userChoice.input();
-        new SchoolApplicationValidator().validateCategory(choice);
+        MenuExecutor menuExecutor = new MenuExecutor(courseDao, studentDao, groups, students, courses);
 
-        if (choice.equals("a")) {
-            List<Integer> foundGroups = queryFactory.getGroups(studentDao);
+        Menu menu = new Menu();
 
-            if (foundGroups.isEmpty()) {
-                System.out.println("There were no such groups");
-            }
+        menu.addItem(new MenuItem("Press '1' to find all groups with less or equals student count",
+                menuExecutor, "getGroups"));
+        menu.addItem(new MenuItem("Press '2' to find all students related to course with given name",
+                menuExecutor, "getAllStudentsByCourseName"));
+        menu.addItem(new MenuItem("Press '3' to add new student",
+                menuExecutor, "addStudent"));
+        menu.addItem(new MenuItem("Press '4' to delete student by STUDENT_ID",
+                menuExecutor, "deleteStudent"));
+        menu.addItem(new MenuItem("Press '5' to add a student to the course (from a list)",
+                menuExecutor, "addStudentToTheCourse"));
+        menu.addItem(new MenuItem("Press '6' to remove the student from one of his or her courses",
+                menuExecutor, "removeTheStudentFromCourse"));
 
-            foundGroups.forEach(g -> System.out.print(g + " "));
-        }
-
-        if (choice.equals("b")) {
-            List<Student> sorted =
-                    queryFactory.getAllStudentsByCourseName(courses, students, courseDao, studentDao);
-
-            sorted.forEach(s -> System.out.println(s.toString()));
-            System.out.println();
-            System.out.println("Calculation is over");
-        }
-
-        if(choice.equals("c")) {
-            queryFactory.addStudent(groups, studentDao);
-            System.out.println("New student added");
-        }
-
-        if(choice.equals("d")) {
-            queryFactory.deleteStudent(students, studentDao);
-            System.out.println("Student deleted");
-        }
-
-        if (choice.equals("e")) {
-            queryFactory.addStudentToTheCourse(students, courses, studentDao);
-            System.out.println("Student added to the course.");
-        }
-
-        if (choice.equals("f")) {
-            queryFactory.removeTheStudentFromCourse(students, studentDao);
-            System.out.println("Student removed from course.");
-        }
+        menu.execute();
     }
 }
