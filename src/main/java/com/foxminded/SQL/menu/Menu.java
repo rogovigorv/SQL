@@ -7,105 +7,101 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Menu {
-	private static BufferedReader in;
-	private static Menu rootMenu;
-	private final List<MenuItem> itemList;
-	private MenuItem exitItem;
-	private String title;
-	private boolean isRootMenu;
+    private final BufferedReader in;
+    private final List<MenuItem> itemList;
+    private final MenuItem exitItem;
+    private String title;
+    private final boolean isRootMenu;
 
-	public Menu() {
-		this.itemList = new ArrayList<>();
-		
-		if (Menu.rootMenu == null) {
-			Menu.in = new BufferedReader(new InputStreamReader(System.in));
-			Menu.rootMenu = this;
-			this.isRootMenu = true;
-			this.setTitle("Menu");
-			
-			this.exitItem = new MenuItem("Exit");
-		}
+    public Menu() {
+        this.itemList = new ArrayList<>();
 
-		if (this.exitItem != null) {
-			this.exitItem.setExitItem();
-		}
-	}
+        this.in = new BufferedReader(new InputStreamReader(System.in));
 
-	public void addItem(MenuItem item) {
-		this.itemList.add(item);
-	}
+        this.isRootMenu = true;
+        this.setTitle("Menu");
+        this.exitItem = new MenuItem("Press '7' to exit");
+        this.exitItem.setExitItem();
+    }
 
-	public void execute() {
-		MenuItem item;
-		do {
-			this.print();
-			item = this.getUserInput(); 
-			item.invoke();
-		}
-		while(!item.isExitItem());
-	}
+    public void addItem(MenuItem item) {
+        this.itemList.add(item);
+    }
 
-	private int getExitIndex() {
-		return this.itemList.size() + 1;
-	}
+    public void execute() {
+        MenuItem item;
+        do {
+            this.print();
+            item = this.getUserInput();
+            item.invoke();
+        }
+        while (!item.isExitItem());
+    }
 
-	private MenuItem getUserInput() {
-		MenuItem item = null;
-		String input = null;
-		
-		try { 
-			input = Menu.in.readLine();
-			int option = Integer.parseInt(input);
-			
-			if (option < 1 || option > this.getExitIndex())
-				throw new NumberFormatException();
-			
-			if (option == this.getExitIndex()) {
-				item = exitItem;
+    private int getExitIndex() {
+        return this.itemList.size() + 1;
+    }
 
-				if (this.isRootMenu)
-					Menu.in.close();
-			}
-			else item = itemList.get(option - 1);
-		}
-		catch (NumberFormatException ex) {
-			System.out.println("\nError: '" + input + "' is not a valid menu option!");
-			item = new MenuItem(null);
+    private MenuItem getUserInput() {
+        MenuItem item = null;
+        String input = null;
 
-			ConsoleUtils.pauseExecution();
-		}
-		catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			return item;
-		}
-	}
+        try {
+            input = this.in.readLine();
+            int option = Integer.parseInt(input);
 
-	private void print() {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("\n");
-		
-		if (!this.title.equals(""))
+            if (option < 1 || option > this.getExitIndex()) {
+                throw new NumberFormatException();
+            }
+            if (option == this.getExitIndex()) {
+                item = exitItem;
+
+                if (this.isRootMenu) {
+                    this.in.close();
+                }
+            } else {
+                item = itemList.get(option - 1);
+            }
+        } catch (NumberFormatException ex) {
+
+            System.out.println("\nError: '" + input + "' is not a valid menu option!");
+            item = new MenuItem(null);
+
+            ConsoleUtils.pauseExecution();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            return item;
+        }
+    }
+
+    private void print() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\n");
+
+        if (!this.title.equals("")) {
 			sb.append(this.title).append("\n");
-		
-		for (int i = 0; i < this.itemList.size(); i++)
+		}
+
+        for (int i = 0; i < this.itemList.size(); i++) {
 			sb.append("\n").append(i + 1).append("... ")
 					.append(this.itemList.get(i).getLabel());
-		
-		sb.append("\n").append(getExitIndex())
-				.append("... ")
-				.append(exitItem.getLabel())
-				.append("\n> ");
-		
-		System.out.print(sb.toString());
-	}
+		}
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	
-	public String toString() {
-		return "menu=[" + this.title + "]  items=" + this.itemList.toString();
-	}
+        sb.append("\n").append(getExitIndex())
+                .append("... ")
+                .append(exitItem.getLabel())
+                .append("\n> ");
+
+        System.out.print(sb.toString());
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String toString() {
+        return "menu=[" + this.title + "]  items=" + this.itemList.toString();
+    }
 }

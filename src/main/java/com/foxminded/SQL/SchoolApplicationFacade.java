@@ -18,22 +18,17 @@ import java.util.List;
 
 public class SchoolApplicationFacade {
     private final TablesGenerator tables;
-    private final DataGenerator groups;
-    private final DataGenerator courses;
-    private final DataGenerator students;
+    private final DataGenerator data;
     private final CourseDao courseDao;
     private final GroupDao groupDao;
     private final StudentDao studentDao;
     private final ConnectionFactory connectionFactory;
 
-    public SchoolApplicationFacade(TablesGenerator tables, DataGenerator groups,
-                                   DataGenerator courses, DataGenerator students,
-                                   CourseDao courseDao, GroupDao groupDao, StudentDao studentDao,
-                                   ConnectionFactory connectionFactory) {
+    public SchoolApplicationFacade(TablesGenerator tables, DataGenerator data,
+                                   CourseDao courseDao, GroupDao groupDao,
+                                   StudentDao studentDao, ConnectionFactory connectionFactory) {
         this.tables = tables;
-        this.groups = groups;
-        this.courses = courses;
-        this.students = students;
+        this.data = data;
         this.courseDao = courseDao;
         this.groupDao = groupDao;
         this.studentDao = studentDao;
@@ -43,9 +38,9 @@ public class SchoolApplicationFacade {
     public void run() {
         tables.create(connectionFactory);
 
-        List<Group> groups = new LinkedList<>(this.groups.generateGroups());
-        List<Course> courses = new LinkedList<>(this.courses.generateCourses());
-        List<Student> students = new LinkedList<>(this.students.generateStudents(groups, courses));
+        List<Group> groups = new LinkedList<>(this.data.generateGroups());
+        List<Course> courses = new LinkedList<>(this.data.generateCourses());
+        List<Student> students = new LinkedList<>(this.data.generateStudents(groups, courses));
 
         try {
             groupDao.insertToDB(groups);

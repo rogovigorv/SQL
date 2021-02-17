@@ -4,12 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class ConnectionFactory {
-
+    private final String driver;
     private final String url;
     private final String userName;
     private final String password;
 
-    public ConnectionFactory(String url, String userName, String password) {
+    public ConnectionFactory(String driver, String url, String userName, String password) {
+        this.driver = driver;
         this.url = url;
         this.userName = userName;
         this.password = password;
@@ -19,7 +20,7 @@ public class ConnectionFactory {
         Connection conn = null;
 
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName(driver);
             conn = DriverManager.getConnection(url, userName, password);
         } catch (Exception e) {
             e.printStackTrace();
