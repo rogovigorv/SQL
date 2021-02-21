@@ -10,6 +10,7 @@ public class Queries {
             "INSERT INTO studentsAndCoursesRelation (student_id, course_id) VALUES (?, ?)";
 
     public static final String SELECT_ALL_COURSES_SQL = "SELECT * FROM courses";
+    public static final String SELECT_ALL_GROUPS_SQL = "SELECT * FROM groups";
     public static final String SELECT_ALL_STUDENTS_SQL = "SELECT * FROM students";
     public static final String SELECT_ALL_STUDENTS_AND_COURSES_RELATION_SQL =
             "SELECT * FROM studentsAndCoursesRelation";

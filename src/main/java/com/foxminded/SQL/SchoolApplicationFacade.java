@@ -2,6 +2,7 @@ package com.foxminded.SQL;
 
 import com.foxminded.SQL.dao.ConnectionFactory;
 import com.foxminded.SQL.dao.CourseDao;
+import com.foxminded.SQL.dao.ExceptionDao;
 import com.foxminded.SQL.dao.GroupDao;
 import com.foxminded.SQL.dao.StudentDao;
 import com.foxminded.SQL.domain.Course;
@@ -12,7 +13,6 @@ import com.foxminded.SQL.generate.TablesGenerator;
 import com.foxminded.SQL.menu.Menu;
 import com.foxminded.SQL.menu.MenuItem;
 import com.foxminded.SQL.menu.MenuExecutor;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,19 +38,23 @@ public class SchoolApplicationFacade {
     public void run() {
         tables.create(connectionFactory);
 
-        List<Group> groups = new LinkedList<>(this.data.generateGroups());
-        List<Course> courses = new LinkedList<>(this.data.generateCourses());
-        List<Student> students = new LinkedList<>(this.data.generateStudents(groups, courses));
+        List<Group> groups = new LinkedList<>(data.generateGroups());
+        List<Course> courses = new LinkedList<>(data.generateCourses());
+        List<Student> students = new LinkedList<>(data.generateStudents(groups, courses));
 
         try {
             groupDao.insertToDB(groups);
             courseDao.insertToDB(courses);
             studentDao.insertToDB(students);
             studentDao.assignAllStudentsToCourses(students);
-        } catch (SQLException throwables) {
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
+        startMenu(groups, courses, students);
+    }
+
+    private void startMenu(List<Group> groups, List<Course> courses, List<Student> students) {
         MenuExecutor menuExecutor = new MenuExecutor(courseDao, studentDao, groups, students, courses);
 
         Menu menu = new Menu();

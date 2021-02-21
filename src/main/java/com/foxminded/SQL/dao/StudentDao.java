@@ -28,7 +28,7 @@ public class StudentDao implements SchoolDao<Student>{
     }
 
     @Override
-    public void insertToDB(List<Student> students) throws SQLException {
+    public void insertToDB(List<Student> students) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_STUDENTS_SQL)) {
 
@@ -44,11 +44,12 @@ public class StudentDao implements SchoolDao<Student>{
                 }
             });
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Students table is not filled." +
+                    " Method insertToDB in StudentDao class collapsed.");
         }
     }
 
-    public List<Integer> getStudentByGroupID() throws SQLException {
+    public List<Integer> getAllGroupIDs() throws ExceptionDao {
         List<Integer> groupsID = new ArrayList<>();
 
         try (Connection conn = connectionFactory.connect();
@@ -62,13 +63,14 @@ public class StudentDao implements SchoolDao<Student>{
             }
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't get all group ID's." +
+                    " Method getAllGroupIDs in StudentDao class collapsed.");
         }
 
         return groupsID;
     }
 
-    public void addNewStudent(Student student) throws SQLException {
+    public void addNewStudent(Student student) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_STUDENTS_SQL)) {
 
@@ -79,11 +81,12 @@ public class StudentDao implements SchoolDao<Student>{
             stat.executeUpdate();
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't add a new student." +
+                    " Method addNewStudent in StudentDao class collapsed.");
         }
     }
 
-    public void deleteStudentByID(int studentID) throws SQLException {
+    public void deleteStudentByID(int studentID) throws ExceptionDao {
 
         try (Connection conn = connectionFactory.connect();
              PreparedStatement relationshipTableStat = conn.prepareStatement(
@@ -99,15 +102,15 @@ public class StudentDao implements SchoolDao<Student>{
             studentsTableStat.executeUpdate();
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't delete student by ID." +
+                    " Method deleteStudentByID in StudentDao class collapsed.");
         }
     }
 
-    public void assignAllStudentsToCourses(List<Student> students) throws SQLException {
+    public void assignAllStudentsToCourses(List<Student> students) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_STUDENTS_AND_COURSES_RELATION_SQL)) {
 
-            try {
                 for (Student student : students) {
                     for (Map.Entry<Integer, Integer> entry : placeInTheTable(student).entrySet()) {
                         int courseID = entry.getKey();
@@ -118,15 +121,13 @@ public class StudentDao implements SchoolDao<Student>{
                         stat.executeUpdate();
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't assign students to the courses." +
+                    " Method assignAllStudentsToCourses in StudentDao class collapsed.");
         }
     }
 
-    public Set<Integer> getStudentsIDByCourseID(int courseID) throws SQLException {
+    public Set<Integer> getStudentsIDByCourseID(int courseID) throws ExceptionDao {
         Set<Integer> studentsID = new HashSet<>();
 
         try (Connection conn = connectionFactory.connect();
@@ -141,14 +142,15 @@ public class StudentDao implements SchoolDao<Student>{
             }
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't get students ID's by course ID." +
+                    " Method getStudentsIDByCourseID in StudentDao class collapsed.");
         }
 
         return studentsID;
     }
 
     public void addToTheCourse(int studentID,  int courseID,
-                               List<Student> students,  List<Course> courses) throws SQLException {
+                               List<Student> students,  List<Course> courses) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(SELECT_ALL_STUDENTS_AND_COURSES_RELATION_SQL)) {
 
@@ -198,11 +200,12 @@ public class StudentDao implements SchoolDao<Student>{
             addNewStudentToTheCourse(desiredStudent, courseID);
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't add student to the course." +
+                    " Method addToTheCourse in StudentDao class collapsed.");
         }
     }
 
-    public void removeFromCourse(int studentID, int courseID, List<Student> students) throws SQLException {
+    public void removeFromCourse(int studentID, int courseID, List<Student> students) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(DELETE_STUDENT_FROM_COURSE_SQL)) {
 
@@ -221,7 +224,8 @@ public class StudentDao implements SchoolDao<Student>{
             });
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't remove student from course." +
+                    " Method removeFromCourse in StudentDao class collapsed.");
         }
     }
 
@@ -243,7 +247,7 @@ public class StudentDao implements SchoolDao<Student>{
     }
 
 
-    private void addNewStudentToTheCourse(Student student, int courseID) throws SQLException {
+    private void addNewStudentToTheCourse(Student student, int courseID) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_STUDENTS_AND_COURSES_RELATION_SQL)) {
 
@@ -259,7 +263,8 @@ public class StudentDao implements SchoolDao<Student>{
                 e.printStackTrace();
             }
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't add student to the course." +
+                    " Method addNewStudentToTheCourse in StudentDao class collapsed.");
         }
     }
 }

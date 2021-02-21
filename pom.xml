@@ -109,7 +109,6 @@
                         <exclude>**/*com/foxminded/SQL/SchoolApplication.class</exclude>
                         <exclude>**/*com/foxminded/SQL/menu/Menu.class</exclude>
                         <exclude>**/*com/foxminded/SQL/menu/MenuItem.class</exclude>
-                        <exclude>**/*com/foxminded/SQL/menu/ConsoleUtils.class</exclude>
                         <exclude>**/*com/foxminded/SQL/menu/MenuExecutor.class</exclude>
                         <exclude>**/*com/foxminded/SQL/input/QueryInput.class</exclude>
                         <exclude>**/*com/foxminded/SQL/domain/Course.class</exclude>
@@ -117,6 +116,7 @@
                         <exclude>**/*com/foxminded/SQL/domain/Student.class</exclude>
                         <exclude>**/*com/foxminded/SQL/dao/Queries.class</exclude>
                         <exclude>**/*com/foxminded/SQL/SchoolApplicationFacade.class</exclude>
+                        <exclude>**/*com/foxminded/SQL//dao/ExceptionDao.class</exclude>
                     </excludes>
                     <rules>
                         <rule>

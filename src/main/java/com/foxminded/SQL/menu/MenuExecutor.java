@@ -1,6 +1,7 @@
 package com.foxminded.SQL.menu;
 
 import com.foxminded.SQL.dao.CourseDao;
+import com.foxminded.SQL.dao.ExceptionDao;
 import com.foxminded.SQL.dao.StudentDao;
 import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
@@ -9,13 +10,16 @@ import com.foxminded.SQL.input.Input;
 import com.foxminded.SQL.input.QueryInput;
 import com.foxminded.SQL.validator.SchoolApplicationValidator;
 import com.foxminded.SQL.validator.Validator;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MenuExecutor {
+    private static final String LINE_BREAK = "\n";
+    private static final String ELLIPSIS = "... ";
+    private static final String TAB = " ";
+
     private final CourseDao courseDao;
     private final StudentDao studentDao;
     private final List<Group> groups;
@@ -34,15 +38,16 @@ public class MenuExecutor {
     public void getGroups() {
         Input userChoice = new QueryInput();
 
-        System.out.println("... Please enter any number to find all groups ID with less or equals student count");
+        System.out.println(ELLIPSIS + "Please enter any number to find all " +
+                "groups ID with less or equals student count");
 
         int choice = Integer.parseInt(userChoice.input());
 
         List<Integer> groupsID = null;
 
         try {
-            groupsID = studentDao.getStudentByGroupID();
-        } catch (SQLException throwables) {
+            groupsID = studentDao.getAllGroupIDs();
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
@@ -67,55 +72,56 @@ public class MenuExecutor {
         });
 
         if (foundGroups.isEmpty()) {
-            System.out.println("... There are no such groups");
+            System.out.println(ELLIPSIS + "There are no such groups");
         }
 
-        System.out.print("... Found group IDs: ");
-        foundGroups.forEach(g -> System.out.print(g + " "));
+        System.out.print(ELLIPSIS + "Found group ID's:" + TAB);
+        foundGroups.forEach(g -> System.out.print(g + TAB));
     }
 
     public void addStudent() {
         Input userInput = new QueryInput();
         Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("... Please enter any student ID (must be more than 200)");
+        System.out.println(ELLIPSIS + "Please enter any student ID (must be more than 200)");
 
         int studentID = Integer.parseInt(userInput.input());
         validator.validateMoreThanTwoHundred(studentID);
 
-        System.out.println("... Please enter any group ID (must be in the range from 1 to 10)");
+        System.out.println(ELLIPSIS + "Please enter any group ID (must be in the range from 1 to 10)");
 
         int groupID = Integer.parseInt(userInput.input());
         validator.validateFromOneToTen(groupID);
 
-        System.out.println("... Please enter student's first name");
+        System.out.println(ELLIPSIS + "Please enter student's first name");
 
         String firstName = userInput.input();
 
-        System.out.println("... Please enter student's last name");
+        System.out.println(ELLIPSIS + "Please enter student's last name");
 
         String lastName = userInput.input();
 
         for (Group group : groups) {
             if(groupID == group.getGroupID()) {
-                Student student = new Student(studentID, group, firstName, lastName, new ArrayList<>());
+                Student student =
+                        new Student(studentID, group, firstName, lastName, new ArrayList<>());
 
                 try {
                     studentDao.addNewStudent(student);
-                } catch (SQLException throwables) {
+                } catch (ExceptionDao throwables) {
                     throwables.printStackTrace();
                 }
             }
         }
 
-        System.out.println("... New student added");
+        System.out.println(ELLIPSIS + "New student added");
     }
 
     public void deleteStudent() {
         Input userInput = new QueryInput();
         Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("... Please enter any student ID (ID must be less or equal than 200)");
+        System.out.println(ELLIPSIS + "Please enter any student ID (ID must be less or equal than 200)");
 
         int studentID = Integer.parseInt(userInput.input());
         validator.validateFromOneToTwoHundred(studentID);
@@ -124,21 +130,23 @@ public class MenuExecutor {
             if (studentID == student.getStudentID()) {
                 try {
                     studentDao.deleteStudentByID(studentID);
-                } catch (SQLException throwables) {
+                } catch (ExceptionDao throwables) {
                     throwables.printStackTrace();
                 }
             }
         }
 
-        System.out.println("... Student deleted");
+        System.out.println(ELLIPSIS + "Student deleted");
     }
 
     public void getAllStudentsByCourseName() {
         Input userInput = new QueryInput();
         Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("... Please enter the course name to find all students enrolled in it " + "\n" +
-                "(available courses: math, biology, chemistry, english, geography, geometry, history, " + "\n" +
+        System.out.println(ELLIPSIS + "Please enter the course name to find all students enrolled in it " +
+                LINE_BREAK +
+                "(available courses: math, biology, chemistry, english, geography, geometry, history, " +
+                LINE_BREAK +
                 "literature, physics, art)");
 
         String courseName = userInput.input();
@@ -152,7 +160,7 @@ public class MenuExecutor {
                 try {
                     int courseID = courseDao.getCourseIDByName(courseName);
                     studentsID.addAll(studentDao.getStudentsIDByCourseID(courseID));
-                } catch (SQLException throwables) {
+                } catch (ExceptionDao throwables) {
                     throwables.printStackTrace();
                 }
             }
@@ -173,12 +181,12 @@ public class MenuExecutor {
         Input userInput = new QueryInput();
         Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("... Please enter the ID of the student (ID must be less or equal than 200)");
+        System.out.println(ELLIPSIS + "Please enter the ID of the student (ID must be less or equal than 200)");
 
         int studentID = Integer.parseInt(userInput.input());
         validator.validateFromOneToTwoHundred(studentID);
 
-        System.out.println("... Please enter the ID of the course you want to enroll students " +
+        System.out.println(ELLIPSIS + "Please enter the ID of the course you want to enroll students " +
                 "(must be in the range from 1 to 10)");
 
         int courseID = Integer.parseInt(userInput.input());
@@ -186,23 +194,23 @@ public class MenuExecutor {
 
         try {
             studentDao.addToTheCourse(studentID, courseID, students, courses);
-        } catch (SQLException throwables) {
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
-        System.out.println("... Student added to the course");
+        System.out.println(ELLIPSIS + "Student added to the course");
     }
 
     public void removeTheStudentFromCourse() {
         Input userInput = new QueryInput();
         Validator validator = new SchoolApplicationValidator();
 
-        System.out.println("... Please enter the ID of the student (ID must be less or equal than 200)");
+        System.out.println(ELLIPSIS + "Please enter the ID of the student (ID must be less or equal than 200)");
 
         int studentID = Integer.parseInt(userInput.input());
         validator.validateFromOneToTwoHundred(studentID);
 
-        System.out.println("... Please enter the ID of the course you want to enroll students "  +
+        System.out.println(ELLIPSIS + "Please enter the ID of the course you want to enroll students "  +
                 "(must be in the range from 1 to 10)");
 
         int courseID = Integer.parseInt(userInput.input());
@@ -210,7 +218,7 @@ public class MenuExecutor {
 
         try {
             studentDao.removeFromCourse(studentID, courseID, students);
-        } catch (SQLException throwables) {
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
     }

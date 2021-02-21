@@ -9,7 +9,8 @@ public class ConnectionFactory {
     private final String userName;
     private final String password;
 
-    public ConnectionFactory(String driver, String url, String userName, String password) {
+    public ConnectionFactory(String driver, String url,
+                             String userName, String password) {
         this.driver = driver;
         this.url = url;
         this.userName = userName;
@@ -21,7 +22,8 @@ public class ConnectionFactory {
 
         try {
             Class.forName(driver);
-            conn = DriverManager.getConnection(url, userName, password);
+            conn = DriverManager
+                    .getConnection(url, userName, password);
         } catch (Exception e) {
             e.printStackTrace();
         }

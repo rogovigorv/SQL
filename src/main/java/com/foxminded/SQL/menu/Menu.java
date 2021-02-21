@@ -1,12 +1,19 @@
 package com.foxminded.SQL.menu;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Menu {
+    private static final Console console = System.console();
+    private static final String LINE_BREAK = "\n";
+    private static final String ELLIPSIS = "... ";
+    private static final String EMPTY_STRING = "";
+    private static final String CURSOR = "> ";
+
     private final BufferedReader in;
     private final List<MenuItem> itemList;
     private final MenuItem exitItem;
@@ -31,15 +38,15 @@ public class Menu {
     public void execute() {
         MenuItem item;
         do {
-            this.print();
-            item = this.getUserInput();
+            print();
+            item = getUserInput();
             item.invoke();
         }
         while (!item.isExitItem());
     }
 
     private int getExitIndex() {
-        return this.itemList.size() + 1;
+        return itemList.size() + 1;
     }
 
     private MenuItem getUserInput() {
@@ -47,27 +54,27 @@ public class Menu {
         String input = null;
 
         try {
-            input = this.in.readLine();
+            input = in.readLine();
             int option = Integer.parseInt(input);
 
-            if (option < 1 || option > this.getExitIndex()) {
+            if (option < 1 || option > getExitIndex()) {
                 throw new NumberFormatException();
             }
-            if (option == this.getExitIndex()) {
+            if (option == getExitIndex()) {
                 item = exitItem;
 
-                if (this.isRootMenu) {
-                    this.in.close();
+                if (isRootMenu) {
+                    in.close();
                 }
             } else {
                 item = itemList.get(option - 1);
             }
         } catch (NumberFormatException ex) {
 
-            System.out.println("\nError: '" + input + "' is not a valid menu option!");
+            System.out.println(LINE_BREAK + "Error: '" + input + "' is not a valid menu option!");
             item = new MenuItem(null);
 
-            ConsoleUtils.pauseExecution();
+            pauseExecution();
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -78,21 +85,25 @@ public class Menu {
     private void print() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("\n");
+        sb.append(LINE_BREAK);
 
-        if (!this.title.equals("")) {
-			sb.append(this.title).append("\n");
+        if (!title.equals(EMPTY_STRING)) {
+			sb.append(title)
+                    .append(LINE_BREAK);
 		}
 
-        for (int i = 0; i < this.itemList.size(); i++) {
-			sb.append("\n").append(i + 1).append("... ")
-					.append(this.itemList.get(i).getLabel());
+        for (int i = 0; i < itemList.size(); i++) {
+			sb.append(LINE_BREAK)
+                    .append(i + 1)
+                    .append(ELLIPSIS)
+					.append(itemList.get(i).getLabel());
 		}
 
-        sb.append("\n").append(getExitIndex())
-                .append("... ")
+        sb.append(LINE_BREAK).append(getExitIndex())
+                .append(ELLIPSIS)
                 .append(exitItem.getLabel())
-                .append("\n> ");
+                .append(LINE_BREAK)
+                .append(CURSOR);
 
         System.out.print(sb.toString());
     }
@@ -102,6 +113,11 @@ public class Menu {
     }
 
     public String toString() {
-        return "menu=[" + this.title + "]  items=" + this.itemList.toString();
+        return "menu=[" + title + "]  items=" + itemList.toString();
+    }
+
+    private void pauseExecution() {
+        System.out.print("Press Enter to Continue" + ELLIPSIS);
+        console.readLine();
     }
 }

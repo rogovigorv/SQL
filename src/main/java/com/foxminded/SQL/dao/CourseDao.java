@@ -17,7 +17,7 @@ public class CourseDao implements SchoolDao<Course> {
     }
 
     @Override
-    public void insertToDB(List<Course> courses) throws SQLException {
+    public void insertToDB(List<Course> courses) throws ExceptionDao {
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_COURSES_SQL)) {
 
@@ -32,11 +32,12 @@ public class CourseDao implements SchoolDao<Course> {
                 }
             });
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Courses table is not filled." +
+                    " Method insertToDB in CourseDao class collapsed.");
         }
     }
 
-    public Integer getCourseIDByName(String courseName) throws SQLException {
+    public Integer getCourseIDByName(String courseName) throws ExceptionDao {
         int courseID = 0;
 
         try (Connection conn = connectionFactory.connect();
@@ -51,7 +52,8 @@ public class CourseDao implements SchoolDao<Course> {
             }
 
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Can't get course ID by name." +
+                    " Method getCourseIDByName in CourseDao class collapsed.");
         }
 
         return courseID;

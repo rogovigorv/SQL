@@ -1,6 +1,8 @@
 package com.foxminded.SQL.domain;
 
 public class Course {
+    private static final String TAB = " ";
+
     private final int courseID;
     private final String courseName;
     private final String courseDescription;
@@ -21,5 +23,9 @@ public class Course {
 
     public String getCourseDescription() {
         return courseDescription;
+    }
+
+    public String toString() {
+        return courseID + TAB + courseName + TAB + courseDescription;
     }
 }

@@ -15,7 +15,7 @@ public class GroupDao implements SchoolDao<Group>{
     }
 
     @Override
-    public void insertToDB(List<Group> groups) throws SQLException {
+    public void insertToDB(List<Group> groups) throws ExceptionDao {
 
         try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(CREATE_GROUPS_SQL)) {
@@ -30,7 +30,8 @@ public class GroupDao implements SchoolDao<Group>{
                 }
             });
         } catch (SQLException throwables) {
-            throw new SQLException();
+            throw new ExceptionDao("Groups table is not filled." +
+                    " Method insertToDB in GroupDao class collapsed.");
         }
     }
 }

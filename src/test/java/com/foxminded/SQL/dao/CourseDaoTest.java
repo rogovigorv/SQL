@@ -7,7 +7,7 @@ import com.foxminded.SQL.generate.DataGenerator;
 import com.foxminded.SQL.generate.TablesGenerator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,23 +15,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CourseDaoTest {
     private static final String DRIVER = "org.h2.Driver";
-    private static final String POSTGRES_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+    private static final String H2_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "";
     private static final String SCRIPT_FILE = "src\\main\\resources\\create_tables.sql";
     private static final String COURSES_LIST_FILE = "src\\main\\resources\\courses.txt";
     private static final String COURSE_NAME = "math";
 
-    private static final List<Student> student = new ArrayList<>();
-    private static final List<Group> group = new LinkedList<>();
+    private static final List<Student> STUDENT = new ArrayList<>();
+    private static final List<Group> GROUP = new LinkedList<>();
     private static List<Course> courses = new LinkedList<>();
 
-    private static final TablesGenerator tables = new TablesGenerator(SCRIPT_FILE);
-    private static final DataGenerator data = new DataGenerator(COURSES_LIST_FILE);
-    private static final ConnectionFactory connectionFactory = new ConnectionFactory(DRIVER, POSTGRES_URL, USERNAME, PASSWORD);
-    private static final CourseDao courseDao = new CourseDao(connectionFactory);
-    private static final GroupDao groupDao = new GroupDao(connectionFactory);
-    private static final StudentDao studentDao = new StudentDao(connectionFactory);
+    private static final TablesGenerator TABLES = new TablesGenerator(SCRIPT_FILE);
+    private static final DataGenerator DATA = new DataGenerator(COURSES_LIST_FILE);
+    private static final ConnectionFactory CONNECTION_FACTORY =
+            new ConnectionFactory(DRIVER, H2_URL, USERNAME, PASSWORD);
+    private static final CourseDao COURSE_DAO = new CourseDao(CONNECTION_FACTORY);
+    private static final GroupDao GROUP_DAO = new GroupDao(CONNECTION_FACTORY);
+    private static final StudentDao STUDENT_DAO = new StudentDao(CONNECTION_FACTORY);
 
     @BeforeAll
     static void setup() {
@@ -45,8 +46,8 @@ public class CourseDaoTest {
         int actual = 0;
 
         try {
-            actual = courseDao.getCourseIDByName(COURSE_NAME);
-        } catch (SQLException throwables) {
+            actual = COURSE_DAO.getCourseIDByName(COURSE_NAME);
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
@@ -54,41 +55,41 @@ public class CourseDaoTest {
     }
 
     private static void createTestData() {
-        tables.create(connectionFactory);
+        TABLES.create(CONNECTION_FACTORY);
 
-        group.add(new Group(1, "LR-19"));
-        courses = data.generateCourses();
+        GROUP.add(new Group(1, "LR-19"));
+        courses = DATA.generateCourses();
 
         List<Course> threeCourses = new LinkedList<>();
         threeCourses.add(courses.get(0));
         threeCourses.add(courses.get(1));
         threeCourses.add(courses.get(2));
 
-        student.add(new Student(1, group.get(0), "James", "Hetfield", threeCourses));
+        STUDENT.add(new Student(1, GROUP.get(0), "James", "Hetfield", threeCourses));
     }
 
     private static void insertTestDataToDB() {
         try {
-            groupDao.insertToDB(group);
-        } catch (SQLException throwables) {
+            GROUP_DAO.insertToDB(GROUP);
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
         try {
-            courseDao.insertToDB(courses);
-        } catch (SQLException throwables) {
+            COURSE_DAO.insertToDB(courses);
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
         try {
-            studentDao.insertToDB(student);
-        } catch (SQLException throwables) {
+            STUDENT_DAO.insertToDB(STUDENT);
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
 
         try {
-            studentDao.assignAllStudentsToCourses(student);
-        } catch (SQLException throwables) {
+            STUDENT_DAO.assignAllStudentsToCourses(STUDENT);
+        } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
     }

@@ -1,6 +1,8 @@
 package com.foxminded.SQL.domain;
 
 public class Group {
+    private static final String TAB = " ";
+
     private final int groupID;
     private final String groupName;
 
@@ -15,5 +17,9 @@ public class Group {
 
     public String getGroupName() {
         return groupName;
+    }
+
+    public String toString() {
+        return groupID + TAB + groupName;
     }
 }

@@ -44,6 +44,6 @@ public class Student {
     }
 
     public String toString() {
-        return firstName + TAB + lastName;
+        return studentID + TAB + firstName + TAB + lastName;
     }
 }
