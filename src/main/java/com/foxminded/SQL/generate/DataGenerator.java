@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -79,18 +78,6 @@ public class DataGenerator {
 
         return students;
     }
-
-//    private List<String> getFirstName() {
-//        return Arrays.asList(
-//                "Olivia", "Isabella", "Evie", "Harry", "Oscar", "James", "Henry", "Leo", "David", "Stanley",
-//                "Rose", "Alice", "Sophia", "Freya", "Thomas", "George", "John", "Dexter", "Connor", "Owen");
-//    }
-//
-//    private List<String> getLastName() {
-//        return Arrays.asList(
-//                "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
-//                "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Wood", "Lewis", "Scott");
-//    }
 
     private Integer nameRandom() {
         return (int) (Math.random() * 20);
