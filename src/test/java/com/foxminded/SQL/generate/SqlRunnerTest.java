@@ -23,13 +23,15 @@ import static com.foxminded.SQL.dao.Queries.SELECT_ALL_STUDENTS_AND_COURSES_RELA
 import static com.foxminded.SQL.dao.Queries.SELECT_ALL_STUDENTS_SQL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TablesGeneratorTest {
+public class SqlRunnerTest {
     private static final String DRIVER = "org.h2.Driver";
     private static final String H2_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "";
     private static final String SCRIPT_FILE = "src\\main\\resources\\create_tables.sql";
     private static final String COURSES_LIST_FILE = "src\\main\\resources\\courses.txt";
+    private static final String STUDENT_FIRST_NAMES_LIST_FILE = "src\\main\\resources\\student_first_names.txt";
+    private static final String STUDENT_LAST_NAMES_LIST_FILE = "src\\main\\resources\\student_last_names.txt";
     private static final String TAB = " ";
     private static final String LINE_BREAK = "\n";
 
@@ -38,16 +40,22 @@ public class TablesGeneratorTest {
     private static final List<Course> THREE_TEST_COURSES = new LinkedList<>();
     private static List<Course> courses = new LinkedList<>();
 
-    private static final TablesGenerator TABLES = new TablesGenerator(SCRIPT_FILE);
-    private static final DataGenerator DATA = new DataGenerator(COURSES_LIST_FILE);
-    private static final ConnectionFactory CONNECTION_FACTORY =
-            new ConnectionFactory(DRIVER, H2_URL, USERNAME, PASSWORD);
-    private static final CourseDao COURSE_DAO = new CourseDao(CONNECTION_FACTORY);
-    private static final GroupDao GROUP_DAO = new GroupDao(CONNECTION_FACTORY);
-    private static final StudentDao STUDENT_DAO = new StudentDao(CONNECTION_FACTORY);
+    private static SqlRunner tables;
+    private static DataGenerator data;
+    private static ConnectionFactory connectionFactory;
+    private static CourseDao courseDao;
+    private static GroupDao groupDao;
+    private static StudentDao studentDao;
 
     @BeforeAll
     static void setup() {
+        tables = new SqlRunner(SCRIPT_FILE);
+        data = new DataGenerator(COURSES_LIST_FILE, STUDENT_FIRST_NAMES_LIST_FILE, STUDENT_LAST_NAMES_LIST_FILE);
+        connectionFactory = new ConnectionFactory(DRIVER, H2_URL, USERNAME, PASSWORD);
+        courseDao = new CourseDao(connectionFactory);
+        groupDao = new GroupDao(connectionFactory);
+        studentDao = new StudentDao(connectionFactory);
+
         createTestData();
         insertTestDataToDB();
     }
@@ -58,7 +66,7 @@ public class TablesGeneratorTest {
 
         StringBuilder fromDB = new StringBuilder();
 
-        try (Connection conn = CONNECTION_FACTORY.connect();
+        try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(SELECT_ALL_GROUPS_SQL)) {
 
             ResultSet rs = stat.executeQuery();
@@ -91,7 +99,7 @@ public class TablesGeneratorTest {
 
         StringBuilder fromDB = new StringBuilder();
 
-        try (Connection conn = CONNECTION_FACTORY.connect();
+        try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(SELECT_ALL_COURSES_SQL)) {
 
             ResultSet rs = stat.executeQuery();
@@ -124,7 +132,7 @@ public class TablesGeneratorTest {
 
         StringBuilder fromDB = new StringBuilder();
 
-        try (Connection conn = CONNECTION_FACTORY.connect();
+        try (Connection conn = connectionFactory.connect();
              PreparedStatement stat = conn.prepareStatement(SELECT_ALL_STUDENTS_SQL)) {
 
             ResultSet rs = stat.executeQuery();
@@ -156,7 +164,7 @@ public class TablesGeneratorTest {
 
         StringBuilder fromDB = new StringBuilder();
 
-        try (Connection conn = CONNECTION_FACTORY.connect();
+        try (Connection conn = connectionFactory.connect();
              PreparedStatement stat =
                      conn.prepareStatement(SELECT_ALL_STUDENTS_AND_COURSES_RELATION_SQL)) {
 
@@ -182,10 +190,10 @@ public class TablesGeneratorTest {
     }
 
     private static void createTestData() {
-        TABLES.create(CONNECTION_FACTORY);
+        tables.runScript(connectionFactory);
 
         GROUP.add(new Group(1, "LR-19"));
-        courses = DATA.generateCourses();
+        courses = data.generateCourses();
 
         THREE_TEST_COURSES.add(courses.get(0));
         THREE_TEST_COURSES.add(courses.get(1));
@@ -194,29 +202,10 @@ public class TablesGeneratorTest {
         STUDENT.add(new Student(1, GROUP.get(0), "James", "Hetfield", THREE_TEST_COURSES));
     }
 
-    private static void insertTestDataToDB() {
-        try {
-            GROUP_DAO.insertToDB(GROUP);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            COURSE_DAO.insertToDB(courses);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            STUDENT_DAO.insertToDB(STUDENT);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            STUDENT_DAO.assignAllStudentsToCourses(STUDENT);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
+    private static void insertTestDataToDB() throws ExceptionDao {
+            groupDao.insertToDB(GROUP);
+            courseDao.insertToDB(courses);
+            studentDao.insertToDB(STUDENT);
+            studentDao.assignAllStudentsToCourses(STUDENT);
     }
 }

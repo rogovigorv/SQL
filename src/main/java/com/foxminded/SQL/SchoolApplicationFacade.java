@@ -9,7 +9,7 @@ import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
 import com.foxminded.SQL.generate.DataGenerator;
-import com.foxminded.SQL.generate.TablesGenerator;
+import com.foxminded.SQL.generate.SqlRunner;
 import com.foxminded.SQL.menu.Menu;
 import com.foxminded.SQL.menu.MenuItem;
 import com.foxminded.SQL.menu.MenuExecutor;
@@ -17,14 +17,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SchoolApplicationFacade {
-    private final TablesGenerator tables;
+    private final SqlRunner tables;
     private final DataGenerator data;
     private final CourseDao courseDao;
     private final GroupDao groupDao;
     private final StudentDao studentDao;
     private final ConnectionFactory connectionFactory;
 
-    public SchoolApplicationFacade(TablesGenerator tables, DataGenerator data,
+    public SchoolApplicationFacade(SqlRunner tables, DataGenerator data,
                                    CourseDao courseDao, GroupDao groupDao,
                                    StudentDao studentDao, ConnectionFactory connectionFactory) {
         this.tables = tables;
@@ -36,7 +36,7 @@ public class SchoolApplicationFacade {
     }
 
     public void run() {
-        tables.create(connectionFactory);
+        tables.runScript(connectionFactory);
 
         List<Group> groups = new LinkedList<>(data.generateGroups());
         List<Course> courses = new LinkedList<>(data.generateCourses());

@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.instanceOf;
 @ExtendWith(MockitoExtension.class)
 public class DataGeneratorTest {
     private static final String COURSES_LIST_FILE = "src\\main\\resources\\courses.txt";
+    private static final String STUDENT_FIRST_NAMES_LIST_FILE = "src\\main\\resources\\student_first_names.txt";
+    private static final String STUDENT_LAST_NAMES_LIST_FILE = "src\\main\\resources\\student_last_names.txt";
 
     @Mock
     List<Group> groups;
@@ -22,7 +24,8 @@ public class DataGeneratorTest {
     @Mock
     List<Course> courses;
 
-    private final DataGenerator data = new DataGenerator(COURSES_LIST_FILE);
+    private final DataGenerator data =
+            new DataGenerator(COURSES_LIST_FILE, STUDENT_FIRST_NAMES_LIST_FILE, STUDENT_LAST_NAMES_LIST_FILE);
 
     @Test
     void shouldConfirmThatTheReturnedObjectClassInTheListMatchesTheGroupClass() {

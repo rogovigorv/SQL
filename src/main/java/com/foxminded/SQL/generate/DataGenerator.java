@@ -12,16 +12,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.toList;
 
 public class DataGenerator {
     private static final String DASH = "-";
 
     private final String coursesListFile;
+    private final String studentFirstNamesListFile;
+    private final String studentLastNamesListFile;
 
-    public DataGenerator(String coursesListFile) {
+    public DataGenerator(String coursesListFile, String studentFirstNamesListFile,
+                         String studentLastNamesListFile) {
         this.coursesListFile = coursesListFile;
+        this.studentFirstNamesListFile = studentFirstNamesListFile;
+        this.studentLastNamesListFile = studentLastNamesListFile;
     }
 
     public List<Group> generateGroups() {
@@ -51,7 +55,7 @@ public class DataGenerator {
     }
 
     public List<Course> generateCourses() {
-        List<String> readCoursesFromFile = readCourses();
+        List<String> readCoursesFromFile = readFromFile(coursesListFile);
 
         return readCoursesFromFile.stream().map(c -> {
             String[] splitLine = c.split(DASH);
@@ -69,23 +73,24 @@ public class DataGenerator {
         for(int i = 1; i <= 200; i++) {
 
             students.add(new Student(i, groups.get(randomWithinTen() - 1),
-                    getFirstName().get(nameRandom()), getLastName().get(nameRandom()), courseRandom(courses)));
+                    readFromFile(studentFirstNamesListFile).get(nameRandom()),
+                    readFromFile(studentLastNamesListFile).get(nameRandom()), courseRandom(courses)));
         }
 
         return students;
     }
 
-    private List<String> getFirstName() {
-        return Arrays.asList(
-                "Olivia", "Isabella", "Evie", "Harry", "Oscar", "James", "Henry", "Leo", "David", "Stanley",
-                "Rose", "Alice", "Sophia", "Freya", "Thomas", "George", "John", "Dexter", "Connor", "Owen");
-    }
-
-    private List<String> getLastName() {
-        return Arrays.asList(
-                "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
-                "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Wood", "Lewis", "Scott");
-    }
+//    private List<String> getFirstName() {
+//        return Arrays.asList(
+//                "Olivia", "Isabella", "Evie", "Harry", "Oscar", "James", "Henry", "Leo", "David", "Stanley",
+//                "Rose", "Alice", "Sophia", "Freya", "Thomas", "George", "John", "Dexter", "Connor", "Owen");
+//    }
+//
+//    private List<String> getLastName() {
+//        return Arrays.asList(
+//                "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
+//                "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Wood", "Lewis", "Scott");
+//    }
 
     private Integer nameRandom() {
         return (int) (Math.random() * 20);
@@ -109,11 +114,11 @@ public class DataGenerator {
         return result;
     }
 
-    private List<String> readCourses() {
+    private List<String> readFromFile(String fileAddress) {
         List<String> readFromFile = new ArrayList<>();
 
         try {
-            readFromFile = Files.lines(Paths.get(coursesListFile))
+            readFromFile = Files.lines(Paths.get(fileAddress))
                     .collect(Collectors.toList());
 
         } catch (IOException e) {

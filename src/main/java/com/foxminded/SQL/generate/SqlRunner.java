@@ -5,14 +5,14 @@ import org.hsqldb.cmdline.SqlFile;
 import java.io.File;
 import java.sql.Connection;
 
-public class TablesGenerator {
+public class SqlRunner {
     private final String scriptFile;
 
-    public TablesGenerator(String scriptFile) {
+    public SqlRunner(String scriptFile) {
         this.scriptFile = scriptFile;
     }
 
-    public void create(ConnectionFactory connectionFactory) {
+    public void runScript(ConnectionFactory connectionFactory) {
         Connection conn = connectionFactory.connect();
 
         try {

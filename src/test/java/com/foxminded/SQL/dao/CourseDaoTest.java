@@ -4,10 +4,9 @@ import com.foxminded.SQL.domain.Course;
 import com.foxminded.SQL.domain.Group;
 import com.foxminded.SQL.domain.Student;
 import com.foxminded.SQL.generate.DataGenerator;
-import com.foxminded.SQL.generate.TablesGenerator;
+import com.foxminded.SQL.generate.SqlRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,22 +19,30 @@ public class CourseDaoTest {
     private static final String PASSWORD = "";
     private static final String SCRIPT_FILE = "src\\main\\resources\\create_tables.sql";
     private static final String COURSES_LIST_FILE = "src\\main\\resources\\courses.txt";
+    private static final String STUDENT_FIRST_NAMES_LIST_FILE = "src\\main\\resources\\student_first_names.txt";
+    private static final String STUDENT_LAST_NAMES_LIST_FILE = "src\\main\\resources\\student_last_names.txt";
     private static final String COURSE_NAME = "math";
 
     private static final List<Student> STUDENT = new ArrayList<>();
     private static final List<Group> GROUP = new LinkedList<>();
     private static List<Course> courses = new LinkedList<>();
 
-    private static final TablesGenerator TABLES = new TablesGenerator(SCRIPT_FILE);
-    private static final DataGenerator DATA = new DataGenerator(COURSES_LIST_FILE);
-    private static final ConnectionFactory CONNECTION_FACTORY =
-            new ConnectionFactory(DRIVER, H2_URL, USERNAME, PASSWORD);
-    private static final CourseDao COURSE_DAO = new CourseDao(CONNECTION_FACTORY);
-    private static final GroupDao GROUP_DAO = new GroupDao(CONNECTION_FACTORY);
-    private static final StudentDao STUDENT_DAO = new StudentDao(CONNECTION_FACTORY);
+    private static SqlRunner tables;
+    private static DataGenerator data;
+    private static ConnectionFactory connectionFactory;
+    private static CourseDao courseDao;
+    private static GroupDao groupDao;
+    private static StudentDao studentDao;
 
     @BeforeAll
     static void setup() {
+        tables = new SqlRunner(SCRIPT_FILE);
+        data = new DataGenerator(COURSES_LIST_FILE, STUDENT_FIRST_NAMES_LIST_FILE, STUDENT_LAST_NAMES_LIST_FILE);
+        connectionFactory = new ConnectionFactory(DRIVER, H2_URL, USERNAME, PASSWORD);
+        courseDao = new CourseDao(connectionFactory);
+        groupDao = new GroupDao(connectionFactory);
+        studentDao = new StudentDao(connectionFactory);
+
         createTestData();
         insertTestDataToDB();
     }
@@ -46,7 +53,7 @@ public class CourseDaoTest {
         int actual = 0;
 
         try {
-            actual = COURSE_DAO.getCourseIDByName(COURSE_NAME);
+            actual = courseDao.getCourseIDByName(COURSE_NAME);
         } catch (ExceptionDao throwables) {
             throwables.printStackTrace();
         }
@@ -55,10 +62,10 @@ public class CourseDaoTest {
     }
 
     private static void createTestData() {
-        TABLES.create(CONNECTION_FACTORY);
+        tables.runScript(connectionFactory);
 
         GROUP.add(new Group(1, "LR-19"));
-        courses = DATA.generateCourses();
+        courses = data.generateCourses();
 
         List<Course> threeCourses = new LinkedList<>();
         threeCourses.add(courses.get(0));
@@ -68,29 +75,10 @@ public class CourseDaoTest {
         STUDENT.add(new Student(1, GROUP.get(0), "James", "Hetfield", threeCourses));
     }
 
-    private static void insertTestDataToDB() {
-        try {
-            GROUP_DAO.insertToDB(GROUP);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            COURSE_DAO.insertToDB(courses);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            STUDENT_DAO.insertToDB(STUDENT);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
-
-        try {
-            STUDENT_DAO.assignAllStudentsToCourses(STUDENT);
-        } catch (ExceptionDao throwables) {
-            throwables.printStackTrace();
-        }
+    private static void insertTestDataToDB() throws ExceptionDao {
+            groupDao.insertToDB(GROUP);
+            courseDao.insertToDB(courses);
+            studentDao.insertToDB(STUDENT);
+            studentDao.assignAllStudentsToCourses(STUDENT);
     }
 }

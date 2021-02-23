@@ -12,4 +12,3 @@ public interface Validator {
 
     void validateCategory(String category);
 }
-
